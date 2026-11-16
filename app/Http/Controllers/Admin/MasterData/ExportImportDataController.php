@@ -236,7 +236,7 @@ class ExportImportDataController extends Controller
                     $kelas = mst_kelas::findForImport($item['unit'], $item['kelas'], $item['kelompok']);
                     $unit = $this->resolveSekolahForImport($item['unit'], $kelas);
 
-                    if (!$thn_aka || !$kelas) {
+                    if (!$thn_aka || !$kelas || !$unit) {
                         Log::warning('export_import_data.validateData.missing_reference', [
                             'nis' => $item['nis'] ?? null,
                             'nodaftar' => $item['nodaftar'] ?? null,
@@ -249,7 +249,7 @@ class ExportImportDataController extends Controller
                             'sekolah_found' => (bool) $unit,
                         ]);
 
-                        return response()->json(['message' => 'Silahkan periksa kembali kelas/thn_aka siswa',
+                        return response()->json(['message' => 'Silahkan periksa kembali kelas/sekolah/thn_aka siswa. Sekolah harus ada di mst_sekolah terlebih dahulu.',
                             'thn_aka' => $thn_aka,
                             'unit' => $unit,
                             'kelas' => $kelas
@@ -415,6 +415,9 @@ class ExportImportDataController extends Controller
         }
 
         $kelasUnit = trim((string) ($kelas->unit ?? ''));
+        if ($kelasUnit === '') {
+            return null;
+        }
 
         return mst_sekolah::query()
             ->where(function ($query) use ($kelasUnit) {
@@ -427,26 +430,20 @@ class ExportImportDataController extends Controller
 
     private function buildScctcustPayload(
         array $item,
-        ?mst_sekolah $unit,
+        mst_sekolah $unit,
         mst_kelas $kelas,
         mst_thn_aka $thn_aka,
         bool $metodeByNodaftar = false,
         ?scctcust $existingCust = null,
     ): array {
-        $unitName = trim((string) ($unit?->DESC01 ?: ($item['unit'] ?? $kelas->unit ?? '')));
-        $unitCode = trim((string) ($unit?->CODE01 ?: ($kelas->kelompok ?? '1')));
-        if ($unitCode === '') {
-            $unitCode = '1';
-        }
-
         $payload = [
             'NOCUST' => $item['nis'] ?? '-',
             'NMCUST' => $item['nama'],
             'NUM2ND' => $item['nodaftar'] ?? '-',
             'STCUST' => 1,
-            'CODE01' => $unitCode,
+            'CODE01' => $unit->CODE01,
             'DESC01' => config('app.nama_instansi'),
-            'CODE02' => $unitName !== '' ? $unitName : (string) $kelas->unit,
+            'CODE02' => $unit->DESC01,
             'DESC02' => $kelas->jenjang,
             'CODE03' => $kelas->id,
             'DESC03' => $kelas->kelas,
