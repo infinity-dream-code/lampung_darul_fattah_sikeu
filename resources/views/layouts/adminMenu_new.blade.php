@@ -86,6 +86,11 @@
                         <div data-i18n="Tagihan Siswa">Tagihan Siswa</div>
                     </a>
                     <ul class="menu-sub">
+                        <li class="menu-item {{ Request::is(['admin/keuangan/tagihan-siswa/data-tagihan*']) ? 'active' : '' }}">
+                            <a href="{{ route('admin.keuangan.tagihan-siswa.data-tagihan.index') }}" class="menu-link">
+                                <div data-i18n="Data Tagihan">Data Tagihan</div>
+                            </a>
+                        </li>
                         <li class="menu-item {{ Request::is(['admin/keuangan/tagihan-siswa/buat-tagihan*']) ? 'active' : '' }}">
                             <a href="{{ route('admin.keuangan.tagihan-siswa.buat-tagihan.index') }}" class="menu-link">
                                 <div data-i18n="Buat Tagihan">Buat Tagihan</div>
