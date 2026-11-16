@@ -63,7 +63,6 @@ class DataTagihanController extends Controller
             ['data' => 'NOVA', 'name' => 'NO VA', 'exportable' => true],
             ['data' => 'NMCUST', 'name' => 'NAMA', 'searchable' => true, 'orderable' => true, 'exportable' => true],
             ['data' => 'CODE02', 'name' => 'Unit', 'searchable' => true, 'orderable' => true, 'exportable' => true],
-            ['data' => 'DESC02', 'name' => 'Kelas', 'searchable' => true, 'orderable' => true, 'exportable' => true],
             ['data' => 'DESC03', 'name' => 'Kelompok', 'searchable' => true, 'orderable' => true, 'exportable' => true],
             ['data' => 'BILLNM', 'name' => 'Nama Tagihan', 'searchable' => true, 'orderable' => true, 'exportable' => true],
             ['data' => 'BILLAM', 'name' => 'Tagihan', 'searchable' => true, 'orderable' => true, 'columnType' => 'currency', 'className' => 'text-end', 'exportable' => true],
@@ -848,7 +847,7 @@ class DataTagihanController extends Controller
             "recordsFiltered" => $totalRecordswithFilter ?? 0,
             "data" => $records ?? [],
             'totals' => [
-                'tagihan' => ['location' => 9, 'value' => $totalTagihan, 'columnType' => 'currency'],
+                'tagihan' => ['location' => 8, 'value' => $totalTagihan, 'columnType' => 'currency'],
             ]
         );
         return response()->json($response);

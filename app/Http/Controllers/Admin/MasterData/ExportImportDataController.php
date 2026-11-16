@@ -54,6 +54,7 @@ class ExportImportDataController extends Controller
             ['data' => 'gender', 'name' => 'Jenis Kelamin', 'searchable' => false, 'orderable' => false],
             ['data' => 'ortu', 'name' => 'Ortu / Wali', 'searchable' => false, 'orderable' => false],
             ['data' => 'alamat', 'name' => 'Alamat', 'searchable' => false, 'orderable' => false],
+            ['data' => 'no_wa', 'name' => 'No WA', 'searchable' => false, 'orderable' => false],
         ];
     }
 
@@ -123,6 +124,7 @@ class ExportImportDataController extends Controller
                 'gender' => $item['gender'] ?? null,
                 'ortu' => $item['ortu'] ?? $item['genus'] ?? null,
                 'alamat' => $item['alamat'] ?? null,
+                'no_wa' => $item['no_wa'] ?? null,
                 'status' => $item['status'] ?? 0,
                 'keterangan' => $item['keterangan'],
             ];
@@ -375,6 +377,13 @@ class ExportImportDataController extends Controller
         return $ortu !== '' ? $ortu : null;
     }
 
+    private function resolveNoWaForDb(array $item): ?string
+    {
+        $noWa = trim((string) ($item['no_wa'] ?? $item['no wa'] ?? $item['nowa'] ?? ''));
+
+        return $noWa !== '' ? $noWa : null;
+    }
+
     /** Nama ortu kedua — hanya untuk file lama (kolom ibu). */
     private function resolveOrtuSecondForDb(array $item): ?string
     {
@@ -439,6 +448,7 @@ class ExportImportDataController extends Controller
             'DESC04' => $thn_aka->thn_aka,
             'DESC05' => $item['alamat'] ?? null,
             'GENUS' => $this->resolveOrtuForDb($item),
+            'NO_WA' => $this->resolveNoWaForDb($item),
             'LastUpdate' => Carbon::now(),
         ];
 
@@ -447,6 +457,9 @@ class ExportImportDataController extends Controller
             $payload['NUM2ND'] = $metodeByNodaftar
                 ? $existingCust->NUM2ND
                 : ($item['nodaftar'] ?? $existingCust->NUM2ND ?? '-');
+            if (blank($payload['NO_WA'])) {
+                $payload['NO_WA'] = $existingCust->NO_WA;
+            }
 
             return $payload;
         }

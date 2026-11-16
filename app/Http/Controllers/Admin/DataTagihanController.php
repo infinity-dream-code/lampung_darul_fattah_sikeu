@@ -58,14 +58,6 @@ class DataTagihanController extends Controller
                 "duplicate" => false
             ],
             [
-                "data" => "DESC02",
-                "name" => "Kelas",
-                "searchable" => true,
-                "orderable" => true,
-                "exportable" => true,
-                "duplicate" => false
-            ],
-            [
                 "data" => "DESC03",
                 "name" => "Kelompok",
                 "searchable" => true,

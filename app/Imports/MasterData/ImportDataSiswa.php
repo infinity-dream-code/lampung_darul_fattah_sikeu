@@ -88,6 +88,7 @@ class ImportDataSiswa implements WithMultipleSheets, ToCollection, WithHeadingRo
             }
 
             $rowData['ortu'] = trim((string) ($rowData['ortu'] ?? $rowData['genus'] ?? $rowData['ayah'] ?? '')) ?: null;
+            $rowData['no_wa'] = trim((string) ($rowData['no_wa'] ?? $rowData['no wa'] ?? $rowData['nowa'] ?? '')) ?: null;
 
             $matchedKelas = mst_kelas::findForImport(
                 $rowData['unit'],
