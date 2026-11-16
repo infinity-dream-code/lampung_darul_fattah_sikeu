@@ -107,6 +107,20 @@ class DataTagihanController extends Controller
                 'duplicate' => false,
             ],
             [
+                'data' => 'kirim_wa',
+                'name' => 'Kirim WA',
+                'orderable' => false,
+                'dataVal' => false,
+                'columnType' => 'button',
+                'className' => 'text-center',
+                'button' => 'action',
+                'buttonText' => 'Kirim WA',
+                'buttonClass' => 'btn btn-sm btn-success btn-kirim-wa',
+                'buttonIcon' => 'ri-whatsapp-line me-2',
+                'exportable' => false,
+                'duplicate' => false,
+            ],
+            [
                 'data' => 'delete',
                 'name' => '',
                 'orderable' => false,
@@ -122,6 +136,56 @@ class DataTagihanController extends Controller
                 'duplicate' => false,
             ],
         ];
+    }
+
+    private function normalizeWaNumber(?string $raw): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) $raw);
+        if ($digits === '') {
+            return null;
+        }
+        if (str_starts_with($digits, '0')) {
+            $digits = '62' . substr($digits, 1);
+        } elseif (str_starts_with($digits, '8')) {
+            $digits = '62' . $digits;
+        }
+
+        return strlen($digits) >= 10 ? $digits : null;
+    }
+
+    private function buildWaMessage(array $bill): string
+    {
+        $jumlah = (int) ($bill['BILLAM'] ?? 0);
+        $instansi = trim((string) config('app.nama_instansi', config('app.name')));
+
+        $lines = [
+            'Yth. Orang Tua/Wali dari ' . trim((string) ($bill['NMCUST'] ?? '')),
+            '',
+            'Berikut informasi tagihan ' . ($instansi !== '' ? $instansi : 'sekolah') . ':',
+            'NIS: ' . trim((string) ($bill['NOCUST'] ?? '-')),
+            'Tagihan: ' . trim((string) ($bill['BILLNM'] ?? '')),
+            'No. Tagihan: ' . trim((string) ($bill['AA'] ?? '-')),
+            'Periode: ' . trim((string) ($bill['BILLAC'] ?? ($bill['BTA'] ?? '-'))),
+            'Jumlah: Rp ' . number_format($jumlah, 0, ',', '.'),
+        ];
+
+        if (!blank($bill['NOVA'] ?? null)) {
+            $lines[] = 'No. VA: ' . trim((string) $bill['NOVA']);
+        }
+
+        $lines[] = '';
+        $lines[] = 'Mohon untuk segera melakukan pembayaran.';
+        $lines[] = 'Terima kasih.';
+
+        return implode("\n", $lines);
+    }
+
+    private function buildWaUrl(array $bill): string
+    {
+        $number = $this->normalizeWaNumber($bill['NO_WA'] ?? null);
+        $text = rawurlencode($this->buildWaMessage($bill));
+
+        return 'https://wa.me/' . ($number ?? '') . '?text=' . $text;
     }
 
     public function index()
@@ -473,7 +537,7 @@ class DataTagihanController extends Controller
         $columnName = 'scctbill.FUrutan';
         $columnSortOrder = 'asc';
         $userOrdered = false;
-        $nonSortableData = ['AA', 'naik', 'turun', 'delete', 'print', 'NOVA'];
+        $nonSortableData = ['AA', 'naik', 'turun', 'delete', 'print', 'NOVA', 'kirim_wa'];
 
         if (!empty($order_arr)) {
             $columnIndex = $columnIndex_arr[0]['column'] ?? null;
@@ -639,6 +703,7 @@ class DataTagihanController extends Controller
             'scctbill.FIDBANK',
             'scctcust.CODE02',
             'scctcust.NUM2ND',
+            'scctcust.NO_WA',
             'scctbill.CUSTID',
 
         ]));
@@ -731,13 +796,27 @@ class DataTagihanController extends Controller
                 $num2nd = $get('NUM2ND');
                 $furutan = $get('FUrutan');
 
+                $nova = ($nocust && $nocust !== '-') ? scctcust::showVA($nocust) : null;
+                $noWa = $get('NO_WA');
+                $waPayload = [
+                    'NMCUST' => $get('NMCUST'),
+                    'NOCUST' => $nocust,
+                    'BILLNM' => $get('BILLNM'),
+                    'AA' => $get('AA'),
+                    'BILLAC' => $get('BILLAC'),
+                    'BTA' => $get('BTA'),
+                    'BILLAM' => $get('BILLAM'),
+                    'NOVA' => $nova,
+                    'NO_WA' => $noWa,
+                ];
+
                 return [
                     'AA' => $get('AA'),
                     'item_id' => $get('AA'),
                     'CUSTID' => $get('CUSTID'),
                     'NOCUST' => ($nocust && $nocust !== '-') ? $nocust : null,
                     'NUM2ND' => ($num2nd && $num2nd !== '-') ? $num2nd : null,
-                    'NOVA' => ($nocust && $nocust !== '-') ? scctcust::showVA($nocust) : null,
+                    'NOVA' => $nova,
                     'NMCUST' => $get('NMCUST'),
                     'CODE02' => $get('CODE02'),
                     'DESC02' => $get('DESC02'),
@@ -749,12 +828,15 @@ class DataTagihanController extends Controller
                     'PAIDST' => $get('PAIDST'),
                     'PAIDDT' => $get('PAIDDT'),
                     'FIDBANK' => $get('FIDBANK'),
+                    'NO_WA' => $noWa,
                     'FUrutan' => ($furutan === null || $furutan === '')
                         ? '0'
                         : (string) (int) $furutan,
                     'print' => true,
                     'naik' => true,
                     'turun' => true,
+                    'kirim_wa' => true,
+                    'WA_URL' => $this->buildWaUrl($waPayload),
                     'delete' => true,
                 ];
             })

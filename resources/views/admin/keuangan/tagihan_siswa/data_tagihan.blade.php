@@ -423,6 +423,20 @@
         }
 
         document.querySelector('#main_table tbody').addEventListener('click', function (e) {
+            if (e.target.closest('.btn-kirim-wa')) {
+                const rowEl = e.target.closest('tr');
+                const rowData = rowEl ? DT[`${dtOptions.tableId}`].row(rowEl).data() : null;
+                if (!rowData || !rowData.WA_URL) {
+                    warningAlert('Data tagihan tidak ditemukan.');
+                    return;
+                }
+                if (!rowData.NO_WA) {
+                    warningAlert('No WA siswa belum diisi. Silakan lengkapi di Data Siswa / Setting Data WA, atau pilih kontak di WhatsApp.');
+                }
+                window.open(rowData.WA_URL, 'sikeu_wa');
+                return;
+            }
+
             if (e.target.closest('.btn-hapus')) {
                 const rowEl = e.target.closest('tr');
 
