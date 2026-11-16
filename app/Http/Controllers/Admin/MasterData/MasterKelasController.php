@@ -52,7 +52,6 @@ class MasterKelasController extends Controller
     {
         return [
             ['data' => null, 'name' => 'no', 'className' => 'text-center', 'columnType' => 'row'],
-            ['data' => 'sekolah', 'name' => 'Sekolah', 'searchable' => true, 'orderable' => true],
             ['data' => 'unit', 'name' => 'Unit', 'searchable' => true, 'orderable' => true],
             ['data' => 'jenjang', 'name' => 'Kelas', 'searchable' => true, 'orderable' => true],
             ['data' => 'kelas', 'name' => 'Kelompok', 'searchable' => true, 'orderable' => true],
