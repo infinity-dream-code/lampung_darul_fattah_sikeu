@@ -88,7 +88,7 @@ class Handler extends ExceptionHandler
 
         $this->ensureSessionUsable($request);
 
-        PersistentLogin::bind($user);
+        PersistentLogin::bind($user, true);
         PersistentLogin::queue($user);
 
         if ($request->hasSession()) {

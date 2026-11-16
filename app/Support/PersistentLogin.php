@@ -22,18 +22,35 @@ class PersistentLogin
         return $minutes > 0 ? $minutes : 5256000;
     }
 
-    public static function bind(?CyberKey $user): void
+    public static function bind(?CyberKey $user, bool $recreateSession = false): void
     {
         if (!$user) {
             return;
         }
 
         if (
-            !Auth::check()
-            || (string) Auth::id() !== (string) $user->getAuthIdentifier()
+            Auth::check()
+            && (string) Auth::id() === (string) $user->getAuthIdentifier()
+            && !$recreateSession
         ) {
-            Auth::login($user);
+            return;
         }
+
+        // Auth::login() calls session()->migrate() and can break parallel AJAX
+        // (DataTables get-data) with Internal Server Error / session lock. Prefer
+        // writing the auth id into the current session unless we must recreate.
+        if ($recreateSession) {
+            Auth::login($user);
+
+            return;
+        }
+
+        $guard = Auth::guard();
+        if (method_exists($guard, 'getName') && session()->isStarted()) {
+            session()->put($guard->getName(), $user->getAuthIdentifier());
+        }
+
+        $guard->setUser($user);
     }
 
     public static function queue(?CyberKey $user): void

@@ -39,7 +39,7 @@ class RecoverCorruptSession
 
         $user = PersistentLogin::userFromRequest($request);
         if ($user) {
-            PersistentLogin::bind($user);
+            PersistentLogin::bind($user, true);
             PersistentLogin::queue($user);
         }
 
