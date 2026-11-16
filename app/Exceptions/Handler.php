@@ -8,6 +8,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
@@ -36,51 +37,24 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
+        if ($this->isSessionReadFailure($e)) {
+            return $this->respondAfterSessionRecovery($request);
+        }
+
         if ($e instanceof TokenMismatchException) {
-            $user = Auth::user() ?: PersistentLogin::userFromRequest($request);
-            if ($user) {
-                PersistentLogin::bind($user);
-                PersistentLogin::queue($user);
-            }
+            $this->ensureSessionUsable($request);
+            $this->restorePersistentUser($request);
 
             if ($request->hasSession()) {
                 $request->session()->regenerateToken();
             }
 
-            if ($this->isAjaxRequest($request)) {
-                return response()->json([
-                    'ok' => true,
-                    'retry' => true,
-                    'token' => csrf_token(),
-                ], 419);
-            }
-
-            if ($request->isMethod('GET')) {
-                return redirect()->to($request->fullUrl());
-            }
-
-            return redirect()->back();
+            return $this->retryOrRedirectResponse($request, 419);
         }
 
         if ($e instanceof AuthenticationException) {
-            $user = Auth::user() ?: PersistentLogin::userFromRequest($request);
-            if ($user) {
-                PersistentLogin::bind($user);
-                PersistentLogin::queue($user);
-
-                if ($this->isAjaxRequest($request)) {
-                    return response()->json([
-                        'ok' => true,
-                        'retry' => true,
-                        'token' => csrf_token(),
-                    ], 401);
-                }
-
-                if ($request->isMethod('GET')) {
-                    return redirect()->to($request->fullUrl());
-                }
-
-                return redirect()->back();
+            if ($this->restorePersistentUser($request)) {
+                return $this->retryOrRedirectResponse($request, 401);
             }
 
             if ($this->isAjaxRequest($request)) {
@@ -105,6 +79,85 @@ class Handler extends ExceptionHandler
         return parent::render($request, $e);
     }
 
+    private function restorePersistentUser(Request $request): bool
+    {
+        $user = Auth::user() ?: PersistentLogin::userFromRequest($request);
+        if (!$user) {
+            return false;
+        }
+
+        $this->ensureSessionUsable($request);
+
+        PersistentLogin::bind($user);
+        PersistentLogin::queue($user);
+
+        if ($request->hasSession()) {
+            $request->session()->regenerateToken();
+        }
+
+        return true;
+    }
+
+    private function ensureSessionUsable(Request $request): void
+    {
+        if (!$request->hasSession()) {
+            return;
+        }
+
+        try {
+            $request->session()->get('_surabaya_alirsyad_session_probe');
+        } catch (Throwable $e) {
+            try {
+                $request->session()->flush();
+            } catch (Throwable $flushError) {
+                //
+            }
+
+            try {
+                $request->session()->regenerate(true);
+            } catch (Throwable $regenerateError) {
+                //
+            }
+        }
+    }
+
+    private function retryOrRedirectResponse(Request $request, int $status): Response
+    {
+        if ($this->isAjaxRequest($request)) {
+            return response()->json([
+                'ok' => true,
+                'retry' => true,
+                'token' => csrf_token(),
+            ], $status);
+        }
+
+        if ($request->isMethod('GET')) {
+            return redirect()->to($request->fullUrl());
+        }
+
+        return redirect()->back();
+    }
+
+    private function respondAfterSessionRecovery(Request $request): Response
+    {
+        $this->ensureSessionUsable($request);
+        $this->restorePersistentUser($request);
+
+        if ($this->isAjaxRequest($request)) {
+            return response()->json([
+                'ok' => true,
+                'retry' => true,
+                'token' => csrf_token(),
+            ]);
+        }
+
+        if ($request->isMethod('GET')) {
+            return redirect()->to($request->fullUrl());
+        }
+
+        return redirect()->back();
+    }
+
     private function isAjaxRequest(Request $request): bool
     {
         return $request->expectsJson()
@@ -112,6 +165,17 @@ class Handler extends ExceptionHandler
             || $request->wantsJson()
             || $request->header('X-Requested-With') === 'XMLHttpRequest'
             || str_contains((string) $request->header('Accept'), 'application/json');
+    }
+
+    private function isSessionReadFailure(Throwable $e): bool
+    {
+        $message = strtolower($e->getMessage() . ' ' . $e->getPrevious()?->getMessage());
+
+        return str_contains($message, 'failed to read session data')
+            || str_contains($message, 'session store not set')
+            || (str_contains($message, 'unserialize') && str_contains($message, 'session'))
+            || str_contains($message, 'sessionpayload')
+            || (str_contains($message, 'session') && str_contains($message, 'corrupt'));
     }
 
     private function isTransientServerError(Throwable $e): bool

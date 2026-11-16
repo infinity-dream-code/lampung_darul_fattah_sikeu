@@ -680,14 +680,10 @@
             const userName = "{{ Auth::user()->name }}";
             const domisili = "{{ config('app.domisili') }}";
             const tanggalSekarang = "{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }}";
-            const APP_NOVA = {{ (int) config('app.nova', 797785) }};
-            const showVA = (nis, unit) => {
+            const APP_NOVA = {{ (int) config('app.nova', 751079) }};
+            const showVA = (nis) => {
                 if (!nis) return '';
-                const code = String(unit ?? '').trim().toLowerCase();
-                const prefix = (code === '63' || code.includes('ma') || code.includes('daftar'))
-                    ? '797785'
-                    : '752086';
-                return prefix + String(nis).padStart(10, '0');
+                return String(APP_NOVA) + String(nis).padStart(10, '0');
             };
             const modalEditNova = new bootstrap.Modal(document.getElementById('modal-edit-nova'));
 
@@ -910,7 +906,7 @@
                     const ortu = siswa.GENUS ?? siswa.genus ?? '-';
                     const mainTable = [
                         [(nocust ? 'NIS ' : 'No. Pendaftaran'), ': ' + (nocust ? nocust : (siswa.NUM2ND ?? '-')), 'Unit', ': ' + (siswa.CODE02 ?? '-')],
-                        [(nocust ? 'No. VA ' : '-'), ': ' + (nocust ? showVA(nocust, siswa.CODE02) : '-'), 'Kelas', ': ' + (siswa.DESC02 ?? '') + ' ' + (siswa.DESC03 ?? '')],
+                        [(nocust ? 'No. VA ' : '-'), ': ' + (nocust ? showVA(nocust) : '-'), 'Kelas', ': ' + (siswa.DESC02 ?? '') + ' ' + (siswa.DESC03 ?? '')],
                         ['Nama ', ': ' + namaSiswa, 'Orang Tua', ': ' + ortu],
                         ['Metode Bayar', ': ' + metodeLabel, '', ''],
                     ]
@@ -1017,7 +1013,7 @@
                     const ortu = siswa.GENUS ?? siswa.genus ?? '-';
                     const mainTable = [
                         [(nocust ? 'NIS ' : 'No. Pendaftaran'), ': ' + (nocust ? nocust : (siswa.NUM2ND ?? '-')), 'Unit', ': ' + (siswa.CODE02 ?? '-')],
-                        [(nocust ? 'No. VA ' : '-'), ': ' + (nocust ? showVA(nocust, siswa.CODE02) : '-'), 'Kelas', ': ' + (siswa.DESC02 ?? '') + ' ' + (siswa.DESC03 ?? '')],
+                        [(nocust ? 'No. VA ' : '-'), ': ' + (nocust ? showVA(nocust) : '-'), 'Kelas', ': ' + (siswa.DESC02 ?? '') + ' ' + (siswa.DESC03 ?? '')],
                         ['Nama ', ': ' + (siswa.NMCUST ?? '-'), 'Orang Tua', ': ' + ortu],
                         ['', '', '', ''],
                     ]
@@ -1103,17 +1099,13 @@
                 $('#edit_nova_custid').val(btn.data('custid') || '');
                 const nis = String(btn.data('nis') || '').trim();
                 $('#edit_nova_nis').val(nis);
-                const selected = $('#siswa').select2('data')[0];
-                const unit = selected?.CODE02 ?? selected?.code02 ?? '';
-                $('#edit_nova_preview').val(nis ? showVA(nis, unit) : '');
+                $('#edit_nova_preview').val(nis ? showVA(nis) : '');
                 modalEditNova.show();
             });
 
             $('#edit_nova_nis').on('input', function () {
-                const selected = $('#siswa').select2('data')[0];
-                const unit = selected?.CODE02 ?? selected?.code02 ?? '';
                 const nis = $(this).val().trim();
-                $('#edit_nova_preview').val(nis ? showVA(nis, unit) : '');
+                $('#edit_nova_preview').val(nis ? showVA(nis) : '');
             });
 
             document.getElementById('form-edit-nova')?.addEventListener('submit', function (e) {

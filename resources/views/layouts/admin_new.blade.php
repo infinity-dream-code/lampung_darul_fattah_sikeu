@@ -185,7 +185,7 @@
                             <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);"
                                data-bs-toggle="dropdown">
                                 <div class="avatar avatar-online">
-                                    <img src="{{asset('at-tibyan.jpg')}}" alt class="rounded-circle">
+                                    <img src="{{asset('alirsyad.jpg')}}" alt class="rounded-circle">
                                 </div>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
@@ -194,7 +194,7 @@
                                         <div class="d-flex">
                                             <div class="flex-shrink-0 me-2">
                                                 <div class="avatar avatar-online">
-                                                    <img src="{{asset('at-tibyan.jpg')}}" alt
+                                                    <img src="{{asset('alirsyad.jpg')}}" alt
                                                          class="rounded-circle">
                                                 </div>
                                             </div>
@@ -377,7 +377,7 @@
         });
     })
 </script>
-<script src="{{ asset('js/session-keepalive.js') }}?v=20260922-auth1"></script>
+<script src="{{ asset('js/session-keepalive.js') }}?v=20261116-alirsyad1"></script>
 
 @hasSection('errorInputHelper')
     <script src="{{asset('js/helper/errorInputHelper.min.js')}}"></script>

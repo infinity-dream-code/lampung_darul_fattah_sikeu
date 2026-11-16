@@ -11,7 +11,9 @@ use Throwable;
 
 class PersistentLogin
 {
-    public const COOKIE = 'at-tibyan';
+    public const COOKIE = 'surabaya_alirsyad';
+
+    public const LEGACY_COOKIE = 'at-tibyan';
 
     public static function lifetimeMinutes(): int
     {
@@ -26,12 +28,12 @@ class PersistentLogin
             return;
         }
 
-        $guard = Auth::guard();
-        if (method_exists($guard, 'getName') && session()->isStarted()) {
-            session()->put($guard->getName(), $user->getAuthIdentifier());
+        if (
+            !Auth::check()
+            || (string) Auth::id() !== (string) $user->getAuthIdentifier()
+        ) {
+            Auth::login($user);
         }
-
-        $guard->setUser($user);
     }
 
     public static function queue(?CyberKey $user): void
@@ -55,17 +57,19 @@ class PersistentLogin
 
     public static function forget(): void
     {
-        Cookie::queue(cookie(
-            self::COOKIE,
-            '',
-            -2628000,
-            config('session.path', '/'),
-            config('session.domain'),
-            self::secure(),
-            true,
-            false,
-            config('session.same_site', 'lax')
-        ));
+        foreach ([self::COOKIE, self::LEGACY_COOKIE] as $name) {
+            Cookie::queue(cookie(
+                $name,
+                '',
+                -2628000,
+                config('session.path', '/'),
+                config('session.domain'),
+                self::secure(),
+                true,
+                false,
+                config('session.same_site', 'lax')
+            ));
+        }
     }
 
     public static function userFromRequest(Request $request): ?CyberKey
@@ -99,13 +103,15 @@ class PersistentLogin
 
     private static function rawCookieValue(Request $request): ?string
     {
-        foreach ([
-            $request->cookie(self::COOKIE),
-            $request->cookies->get(self::COOKIE),
-            $_COOKIE[self::COOKIE] ?? null,
-        ] as $raw) {
-            if (is_string($raw) && trim($raw) !== '') {
-                return trim($raw);
+        foreach ([self::COOKIE, self::LEGACY_COOKIE] as $name) {
+            foreach ([
+                $request->cookie($name),
+                $request->cookies->get($name),
+                $_COOKIE[$name] ?? null,
+            ] as $raw) {
+                if (is_string($raw) && trim($raw) !== '') {
+                    return trim($raw);
+                }
             }
         }
 

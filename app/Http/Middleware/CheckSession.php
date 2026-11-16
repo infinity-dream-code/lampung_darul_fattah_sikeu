@@ -22,10 +22,14 @@ class CheckSession
 
         if (!Auth::check()) {
             if ($request->expectsJson() || $request->ajax() || $request->wantsJson()) {
-                return response()->json(['retry' => true, 'token' => csrf_token()], 401);
+                return response()->json([
+                    'ok' => true,
+                    'retry' => true,
+                    'token' => csrf_token(),
+                ], 401);
             }
 
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         return $next($request);
