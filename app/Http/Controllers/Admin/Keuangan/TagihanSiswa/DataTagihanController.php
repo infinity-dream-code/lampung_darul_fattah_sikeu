@@ -770,7 +770,9 @@ class DataTagihanController extends Controller
                 ->orderBy('scctbill.AA', 'asc');
         } else {
             $recordsQuery
-                ->orderBy('scctbill.BTA')
+                ->orderBy('scctcust.NMCUST', 'asc')
+                ->orderBy('scctcust.NOCUST', 'asc')
+                ->orderBy('scctbill.BTA', 'asc')
                 ->orderByRaw("
                     CASE
                         WHEN scctbill.BILLNM LIKE '%JULI%' THEN 1
@@ -789,7 +791,7 @@ class DataTagihanController extends Controller
                     END
                 ")
                 ->orderByRaw('CAST(COALESCE(scctbill.FUrutan, 0) AS SIGNED) ASC')
-                ->orderBy('scctcust.NOCUST', 'asc');
+                ->orderBy('scctbill.AA', 'asc');
         }
 
         $records = $recordsQuery

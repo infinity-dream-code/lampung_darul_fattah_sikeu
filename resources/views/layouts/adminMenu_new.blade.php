@@ -144,6 +144,7 @@
             </ul>
         </li>
 
+        {{-- Hidden for Yayasan Darul Fattah Lampung: menu Laporan
             <li class="menu-item {{ Request::is([
             'admin/data-tagihan',
             'admin/data-penerimaan',
@@ -220,6 +221,7 @@
                 </li>
             </ul>
         </li>
+        --}}
         
         <li class="menu-item {{ Request::is(['admin/manual-input*']) ? 'active open' : '' }}">
             <a href="javascript:void(0);" class="menu-link menu-toggle">
