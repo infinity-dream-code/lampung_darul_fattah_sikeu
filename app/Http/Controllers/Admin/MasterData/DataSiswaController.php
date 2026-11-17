@@ -76,7 +76,7 @@ class DataSiswaController extends Controller
 
     public function getColumn()
     {
-        return [
+        $columns = [
             ["data" => null, "name" => "no", "className" => "text-center", "columnType" => "row", "exportable" => true],
             ["data" => "nocust", "name" => "NIS", "searchable" => true, "orderable" => true, "exportable" => true],
             ["data" => "va_spp", "name" => "VA SPP", "searchable" => false, "orderable" => false, "exportable" => true],
@@ -90,33 +90,39 @@ class DataSiswaController extends Controller
             ["data" => "CODE04", "name" => "Gender", "searchable" => true, "orderable" => true, "exportable" => true],
             ["data" => "DESC05", "name" => "Alamat", "searchable" => true, "orderable" => true, "exportable" => true],
             ["data" => "GENUS", "name" => "Orang Tua", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "NO_WA", "name" => "No WA", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "STCUST", "name" => "Status (1/0)", "searchable" => true, "orderable" => true, "exportable" => true],
-            [
-                "data" => "edit_siswa",
-                "name" => "Edit Data",
-                "dataVal" => false,
-                "columnType" => "button",
-                "className" => "text-center",
-                "button" => "modal",
-                "buttonLink" => "#modal-edit-siswa",
-                "buttonText" => "Edit",
-                "buttonClass" => "btn btn-sm btn-info button-edit-siswa",
-                "buttonIcon" => "ri-edit-line me-2",
-            ],
-            [
-                "data" => "set_status",
-                "name" => "Edit Status",
-                "dataVal" => false,
-                "columnType" => "button",
-                "className" => "text-center",
-                "button" => "modal",
-                "buttonLink" => "#modal-edit-status-siswa",
-                "buttonText" => "Edit Status",
-                "buttonClass" => "btn btn-sm btn-warning button-set-status-siswa",
-                "buttonIcon" => "ri-edit-box-line me-2",
-            ],
         ];
+
+        if (DbSchema::scctcustHasNoWa()) {
+            $columns[] = ["data" => "NO_WA", "name" => "No WA", "searchable" => true, "orderable" => true, "exportable" => true];
+        }
+
+        $columns[] = ["data" => "STCUST", "name" => "Status (1/0)", "searchable" => true, "orderable" => true, "exportable" => true];
+        $columns[] = [
+            "data" => "edit_siswa",
+            "name" => "Edit Data",
+            "dataVal" => false,
+            "columnType" => "button",
+            "className" => "text-center",
+            "button" => "modal",
+            "buttonLink" => "#modal-edit-siswa",
+            "buttonText" => "Edit",
+            "buttonClass" => "btn btn-sm btn-info button-edit-siswa",
+            "buttonIcon" => "ri-edit-line me-2",
+        ];
+        $columns[] = [
+            "data" => "set_status",
+            "name" => "Edit Status",
+            "dataVal" => false,
+            "columnType" => "button",
+            "className" => "text-center",
+            "button" => "modal",
+            "buttonLink" => "#modal-edit-status-siswa",
+            "buttonText" => "Edit Status",
+            "buttonClass" => "btn btn-sm btn-warning button-set-status-siswa",
+            "buttonIcon" => "ri-edit-box-line me-2",
+        ];
+
+        return $columns;
     }
 
     public function getData(Request $request)

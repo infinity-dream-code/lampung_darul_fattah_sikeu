@@ -144,11 +144,13 @@
 {{--                                </div>--}}
                             </div>
                             <div class="col-md-6">
+                                @if(!empty($featureWa))
                                 <div class="mb-3">
                                     <label class="form-label required" for="edit-nowa">Nomor WhatsApp</label>
                                     <input type="text" class="form-control numberOnly" id="edit-nowa" name="nowa"
                                            placeholder="Nomor WhatsApp" required>
                                 </div>
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label" for="edit-nama_ortu">Nama Orang Tua/Wali</label>
                                     <input type="text" class="form-control" id="edit-nama_ortu" name="nama_ortu"
@@ -275,11 +277,13 @@
                                 </div>
                             </div>
                             <div class="col-md-6">
+                                @if(!empty($featureWa))
                                 <div class="mb-3">
                                     <label class="form-label required" for="nowa">Nomor WhatsApp</label>
                                     <input type="text" class="form-control numberOnly" id="nowa" name="nowa"
                                            placeholder="Nomor WhatsApp" required>
                                 </div>
+                                @endif
                                 <div class="mb-3">
                                     <label class="form-label" for="nama_ortu">Nama Orang Tua/Wali</label>
                                     <input type="text" class="form-control" id="nama_ortu" name="nama_ortu"

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Imports\MasterData\ImportSettingDataWa;
 use App\Models\scctcust;
 use App\Models\ValidationMessage;
+use App\Support\DbSchema;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -20,6 +21,17 @@ class SettingDataWaController extends Controller
     public string $mainTitle = "Setting Data WA";
     public string $dataTitle = "Setting Data WA";
     public string $cacheKey = "import_setting_data_wa";
+
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (!DbSchema::scctcustHasNoWa()) {
+                abort(404);
+            }
+
+            return $next($request);
+        });
+    }
 
     public function index()
     {

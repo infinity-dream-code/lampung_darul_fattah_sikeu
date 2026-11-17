@@ -227,11 +227,13 @@
                                 <input type="text" class="form-control form-control-sm"
                                        id="edit_siswa-genus" name="ayah">
                             </div>
+                            @if(!empty($featureWa))
                             <div class="col-md-4">
                                 <label class="form-label">No WA</label>
                                 <input type="text" class="form-control form-control-sm"
                                        id="edit_siswa-nowa" name="no_wa">
                             </div>
+                            @endif
                             <div class="col-md-9">
                                 <label class="form-label">Alamat</label>
                                 <textarea class="form-control form-control-sm" id="edit_siswa-alamat" name="alamat" rows="2"></textarea>

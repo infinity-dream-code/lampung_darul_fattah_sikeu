@@ -57,7 +57,7 @@ class DataTagihanController extends Controller
 
     public function getColumn()
     {
-        return [
+        $columns = [
             ['data' => 'AA', 'name' => 'no', 'columnType' => 'row', 'exportable' => true],
             ['data' => 'NOCUST', 'name' => 'NIS', 'searchable' => true, 'orderable' => true, 'exportable' => true],
             ['data' => 'NUM2ND', 'name' => 'NO DAFT', 'searchable' => true, 'orderable' => true, 'exportable' => true],
@@ -106,7 +106,10 @@ class DataTagihanController extends Controller
                 'exportable' => false,
                 'duplicate' => false,
             ],
-            [
+        ];
+
+        if (DbSchema::scctcustHasNoWa()) {
+            $columns[] = [
                 'data' => 'kirim_wa',
                 'name' => 'Kirim WA',
                 'orderable' => false,
@@ -119,23 +122,26 @@ class DataTagihanController extends Controller
                 'buttonIcon' => 'ri-whatsapp-line me-2',
                 'exportable' => false,
                 'duplicate' => false,
-            ],
-            [
-                'data' => 'delete',
-                'name' => '',
-                'orderable' => false,
-                'dataVal' => false,
-                'columnType' => 'button',
-                'className' => 'text-center',
-                'button' => 'action',
-                'buttonText' => 'Hapus',
-                'buttonClass' => 'btn btn-sm btn-danger btn-hapus',
-                'buttonLink' => '#modal-delete',
-                'buttonIcon' => 'ri-delete-bin-line me-2',
-                'exportable' => false,
-                'duplicate' => false,
-            ],
+            ];
+        }
+
+        $columns[] = [
+            'data' => 'delete',
+            'name' => '',
+            'orderable' => false,
+            'dataVal' => false,
+            'columnType' => 'button',
+            'className' => 'text-center',
+            'button' => 'action',
+            'buttonText' => 'Hapus',
+            'buttonClass' => 'btn btn-sm btn-danger btn-hapus',
+            'buttonLink' => '#modal-delete',
+            'buttonIcon' => 'ri-delete-bin-line me-2',
+            'exportable' => false,
+            'duplicate' => false,
         ];
+
+        return $columns;
     }
 
     private function normalizeWaNumber(?string $raw): ?string
@@ -790,7 +796,7 @@ class DataTagihanController extends Controller
             ->skip($start)
             ->take($rowperpage)
             ->get()
-            ->map(function ($item, $index) {
+            ->map(function ($item, $index) use ($hasNoWa) {
                 $row = $item->toArray();
                 $get = static fn (string $key) => $row[$key] ?? $row[strtolower($key)] ?? null;
 
@@ -799,7 +805,7 @@ class DataTagihanController extends Controller
                 $furutan = $get('FUrutan');
 
                 $nova = ($nocust && $nocust !== '-') ? scctcust::showVA($nocust) : null;
-                $noWa = $get('NO_WA');
+                $noWa = $hasNoWa ? $get('NO_WA') : null;
                 $waPayload = [
                     'NMCUST' => $get('NMCUST'),
                     'NOCUST' => $nocust,
@@ -812,7 +818,7 @@ class DataTagihanController extends Controller
                     'NO_WA' => $noWa,
                 ];
 
-                return [
+                $mapped = [
                     'AA' => $get('AA'),
                     'item_id' => $get('AA'),
                     'CUSTID' => $get('CUSTID'),
@@ -837,10 +843,15 @@ class DataTagihanController extends Controller
                     'print' => true,
                     'naik' => true,
                     'turun' => true,
-                    'kirim_wa' => true,
-                    'WA_URL' => $this->buildWaUrl($waPayload),
                     'delete' => true,
                 ];
+
+                if ($hasNoWa) {
+                    $mapped['kirim_wa'] = true;
+                    $mapped['WA_URL'] = $this->buildWaUrl($waPayload);
+                }
+
+                return $mapped;
             })
             ->values()
             ->all();

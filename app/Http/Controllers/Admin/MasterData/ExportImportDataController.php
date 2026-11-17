@@ -39,11 +39,10 @@ class ExportImportDataController extends Controller
 
     public function getColumn()
     {
-        return [
+        $columns = [
             ['data' => null, 'name' => 'no', 'className' => 'text-center', 'columnType' => 'row'],
             ['data' => 'nis', 'name' => 'NIS', 'searchable' => false, 'orderable' => false],
             ['data' => 'nodaftar', 'name' => 'No Pend', 'searchable' => false, 'orderable' => false],
-//            ['data' => 'NOVA', 'name' => 'NO VA'],
             ['data' => 'name', 'name' => 'NAMA', 'searchable' => false, 'orderable' => false],
             ['data' => 'status', 'name' => 'Status', 'searchable' => true, 'orderable' => true, 'columnType' => 'importstatus'],
             ['data' => 'keterangan', 'name' => 'Keterangan', 'searchable' => true, 'orderable' => true],
@@ -54,8 +53,13 @@ class ExportImportDataController extends Controller
             ['data' => 'gender', 'name' => 'Jenis Kelamin', 'searchable' => false, 'orderable' => false],
             ['data' => 'ortu', 'name' => 'Ortu / Wali', 'searchable' => false, 'orderable' => false],
             ['data' => 'alamat', 'name' => 'Alamat', 'searchable' => false, 'orderable' => false],
-            ['data' => 'no_wa', 'name' => 'No WA', 'searchable' => false, 'orderable' => false],
         ];
+
+        if (\App\Support\DbSchema::scctcustHasNoWa()) {
+            $columns[] = ['data' => 'no_wa', 'name' => 'No WA', 'searchable' => false, 'orderable' => false];
+        }
+
+        return $columns;
     }
 
     public function getData(Request $request)

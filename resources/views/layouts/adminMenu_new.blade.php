@@ -52,11 +52,13 @@
                         <div data-i18n="Data Siswa">Data Siswa</div>
                     </a>
                 </li>
+                @if(!empty($featureWa))
                 <li class="menu-item {{ Request::is(['admin/master-data/setting-data-wa*']) ? 'active' : '' }}">
                     <a href="{{ route('admin.master-data.setting-data-wa.index') }}" class="menu-link">
                         <div data-i18n="Setting Data WA">Setting Data WA</div>
                     </a>
                 </li>
+                @endif
                 <li class="menu-item {{ Request::is(['admin/master-data/master-post*']) ? 'active' : '' }}">
                     <a href="{{ route('admin.master-data.master-post.index') }}" class="menu-link">
                         <div data-i18n="Master Post">Master Post</div>
