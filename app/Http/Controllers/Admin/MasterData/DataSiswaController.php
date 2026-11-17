@@ -76,28 +76,32 @@ class DataSiswaController extends Controller
 
     public function getColumn()
     {
+        // Data Siswa: 1 baris = 1 siswa. Jangan merge sel (duplicate),
+        // supaya Edit/Status tidak terlihat "borongan".
+        $base = ["duplicate" => false];
+
         $columns = [
-            ["data" => null, "name" => "no", "className" => "text-center", "columnType" => "row", "exportable" => true],
-            ["data" => "nocust", "name" => "NIS", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "va_spp", "name" => "VA SPP", "searchable" => false, "orderable" => false, "exportable" => true],
-            ["data" => "va_saku", "name" => "VA Saku", "searchable" => false, "orderable" => false, "exportable" => true],
-            ["data" => "NUM2ND", "name" => "No Pendaftaran", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "nmcust", "name" => "NAMA", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "CODE02", "name" => "Unit", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "DESC02", "name" => "Kelas", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "DESC03", "name" => "Jenjang", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "DESC04", "name" => "Angkatan", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "CODE04", "name" => "Gender", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "DESC05", "name" => "Alamat", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "GENUS", "name" => "Orang Tua", "searchable" => true, "orderable" => true, "exportable" => true],
+            array_merge($base, ["data" => null, "name" => "no", "className" => "text-center", "columnType" => "row", "exportable" => true]),
+            array_merge($base, ["data" => "nocust", "name" => "NIS", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "va_spp", "name" => "VA SPP", "searchable" => false, "orderable" => false, "exportable" => true]),
+            array_merge($base, ["data" => "va_saku", "name" => "VA Saku", "searchable" => false, "orderable" => false, "exportable" => true]),
+            array_merge($base, ["data" => "NUM2ND", "name" => "No Pendaftaran", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "nmcust", "name" => "NAMA", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "CODE02", "name" => "Unit", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "DESC02", "name" => "Kelas", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "DESC03", "name" => "Jenjang", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "DESC04", "name" => "Angkatan", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "CODE04", "name" => "Gender", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "DESC05", "name" => "Alamat", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "GENUS", "name" => "Orang Tua", "searchable" => true, "orderable" => true, "exportable" => true]),
         ];
 
         if (DbSchema::scctcustHasNoWa()) {
-            $columns[] = ["data" => "NO_WA", "name" => "No WA", "searchable" => true, "orderable" => true, "exportable" => true];
+            $columns[] = array_merge($base, ["data" => "NO_WA", "name" => "No WA", "searchable" => true, "orderable" => true, "exportable" => true]);
         }
 
-        $columns[] = ["data" => "STCUST", "name" => "Status (1/0)", "searchable" => true, "orderable" => true, "exportable" => true];
-        $columns[] = [
+        $columns[] = array_merge($base, ["data" => "STCUST", "name" => "Status (1/0)", "searchable" => true, "orderable" => true, "exportable" => true]);
+        $columns[] = array_merge($base, [
             "data" => "edit_siswa",
             "name" => "Edit Data",
             "dataVal" => false,
@@ -108,8 +112,8 @@ class DataSiswaController extends Controller
             "buttonText" => "Edit",
             "buttonClass" => "btn btn-sm btn-info button-edit-siswa",
             "buttonIcon" => "ri-edit-line me-2",
-        ];
-        $columns[] = [
+        ]);
+        $columns[] = array_merge($base, [
             "data" => "set_status",
             "name" => "Edit Status",
             "dataVal" => false,
@@ -120,7 +124,7 @@ class DataSiswaController extends Controller
             "buttonText" => "Edit Status",
             "buttonClass" => "btn btn-sm btn-warning button-set-status-siswa",
             "buttonIcon" => "ri-edit-box-line me-2",
-        ];
+        ]);
 
         return $columns;
     }
