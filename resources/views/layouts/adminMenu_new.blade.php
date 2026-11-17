@@ -243,11 +243,13 @@
                 <div data-i18n="Rekap Data">Rekap Data</div>
             </a>
             <ul class="menu-sub">
+                {{-- Hidden for Yayasan Darul Fattah Lampung: Cek Pelunasan
                 <li class="menu-item {{ Request::is(['admin/rekap-data/cek-pelunasan*']) ? 'active' : '' }}">
                     <a href="{{ route('admin.rekap-data.cek-pelunasan.index') }}" class="menu-link">
                         <div data-i18n="Cek Pelunasan">Cek Pelunasan</div>
                     </a>
                 </li>
+                --}}
                 <li class="menu-item {{ Request::is(['admin/rekap-data/cek-lunas-siswa*']) ? 'active' : '' }}">
                     <a href="{{ route('admin.rekap-data.cek-lunas-siswa.index') }}" class="menu-link">
                         <div data-i18n="Cek Lunas Siswa">Cek Lunas Siswa</div>

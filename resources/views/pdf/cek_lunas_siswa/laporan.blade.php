@@ -4,12 +4,13 @@
     <meta charset="utf-8">
     <title>Cek Lunas Siswa</title>
     <style>
-        * { font-family: DejaVu Sans, sans-serif; font-size: 11px; }
+        * { font-family: DejaVu Sans, sans-serif; font-size: 10px; }
         h3 { margin: 0 0 4px 0; }
         table { width: 100%; border-collapse: collapse; margin-top: 8px; }
-        th, td { border: 1px solid #444; padding: 4px 6px; vertical-align: top; }
+        th, td { border: 1px solid #444; padding: 3px 5px; vertical-align: top; }
         th { background: #eee; text-align: left; }
         .text-center { text-align: center; }
+        .text-end { text-align: right; }
         .lunas { color: #146c43; font-weight: bold; }
         .belum { color: #b02a37; font-weight: bold; }
     </style>
@@ -30,14 +31,17 @@
 <table>
     <thead>
     <tr>
-        <th class="text-center" style="width: 30px;">No</th>
+        <th class="text-center" style="width: 28px;">No</th>
         <th>Thn Akademik</th>
         <th>NIS</th>
+        <th>No Pend</th>
+        <th>NO VA</th>
         <th>Nama Siswa</th>
         <th>Nama Tagihan</th>
+        <th class="text-end">Nominal Tagihan</th>
+        <th class="text-center">Status</th>
         <th>Kelas</th>
         <th>Unit</th>
-        <th class="text-center">Status</th>
     </tr>
     </thead>
     <tbody>
@@ -46,10 +50,11 @@
             <td class="text-center">{{ $i + 1 }}</td>
             <td>{{ $row['BTA'] ?? '-' }}</td>
             <td>{{ $row['nocust'] ?? '-' }}</td>
+            <td>{{ $row['NUM2ND'] ?? '-' }}</td>
+            <td>{{ $row['NOVA'] ?? '-' }}</td>
             <td>{{ $row['nmcust'] ?? '-' }}</td>
             <td>{{ $row['BILLNM'] ?? '-' }}</td>
-            <td>{{ $row['kelas_display'] ?? '-' }}</td>
-            <td>{{ $row['CODE02'] ?? '-' }}</td>
+            <td class="text-end">{{ number_format((float) ($row['BILLAM'] ?? 0), 0, ',', '.') }}</td>
             <td class="text-center">
                 @if(!empty($row['status']))
                     <span class="lunas">LUNAS</span>
@@ -57,10 +62,12 @@
                     <span class="belum">BELUM LUNAS</span>
                 @endif
             </td>
+            <td>{{ $row['kelas_display'] ?? '-' }}</td>
+            <td>{{ $row['CODE02'] ?? '-' }}</td>
         </tr>
     @empty
         <tr>
-            <td colspan="8" class="text-center">Data tidak ditemukan</td>
+            <td colspan="11" class="text-center">Data tidak ditemukan</td>
         </tr>
     @endforelse
     </tbody>

@@ -49,12 +49,28 @@ class CekLunasSiswaController extends Controller
 
     public function getColumn()
     {
+        // Format mengikuti Cek Pelunasan + kolom Nominal Tagihan.
+        // 1 baris = 1 tagihan siswa, tanpa merge sel.
+        $base = ["duplicate" => false];
+
         return [
-            ["data" => null, "name" => "no", "className" => "text-center", "columnType" => "row", "exportable" => true],
-            ["data" => "BTA", "name" => "Thn Akademik", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "nmcust", "name" => "Nama Siswa", "searchable" => true, "orderable" => true, "exportable" => true],
-            ["data" => "BILLNM", "name" => "Nama Tagihan", "searchable" => true, "orderable" => true, "exportable" => true],
-            [
+            array_merge($base, ["data" => null, "name" => "no", "className" => "text-center", "columnType" => "row", "exportable" => true]),
+            array_merge($base, ["data" => "BTA", "name" => "Thn Akademik", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "nocust", "name" => "NIS", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "NUM2ND", "name" => "No Pend", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "NOVA", "name" => "NO VA", "searchable" => false, "orderable" => false, "exportable" => true]),
+            array_merge($base, ["data" => "nmcust", "name" => "Nama Siswa", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, ["data" => "BILLNM", "name" => "Nama Tagihan", "searchable" => true, "orderable" => true, "exportable" => true]),
+            array_merge($base, [
+                "data" => "BILLAM",
+                "name" => "Nominal Tagihan",
+                "searchable" => true,
+                "orderable" => true,
+                "exportable" => true,
+                "columnType" => "currency",
+                "className" => "text-end",
+            ]),
+            array_merge($base, [
                 "data" => "status",
                 "name" => "Status",
                 "searchable" => false,
@@ -63,9 +79,9 @@ class CekLunasSiswaController extends Controller
                 "columnType" => "boolean",
                 "trueVal" => "LUNAS",
                 "falseVal" => "BELUM LUNAS",
-            ],
-            ["data" => "kelas_display", "name" => "Kelas", "searchable" => true, "orderable" => false, "exportable" => true],
-            ["data" => "CODE02", "name" => "Unit", "searchable" => true, "orderable" => true, "exportable" => true],
+            ]),
+            array_merge($base, ["data" => "kelas_display", "name" => "Kelas", "searchable" => true, "orderable" => false, "exportable" => true]),
+            array_merge($base, ["data" => "CODE02", "name" => "Unit", "searchable" => true, "orderable" => true, "exportable" => true]),
         ];
     }
 
@@ -127,7 +143,9 @@ class CekLunasSiswaController extends Controller
                 $sanitized = str_replace(["\\", "%", "_"], ["\\\\", "\\%", "\\_"], $searchValue);
                 $q->where(function ($q2) use ($sanitized) {
                     $q2->orWhere("scctcust.nmcust", "like", "%{$sanitized}%")
-                        ->orWhere("scctcust.nocust", "like", "%{$sanitized}%");
+                        ->orWhere("scctcust.nocust", "like", "%{$sanitized}%")
+                        ->orWhere("scctcust.NUM2ND", "like", "%{$sanitized}%")
+                        ->orWhere("scctbill.BILLNM", "like", "%{$sanitized}%");
                 });
             })
             ->where($filterClosure);
@@ -140,15 +158,18 @@ class CekLunasSiswaController extends Controller
                 "scctbill.AA",
                 "scctbill.CUSTID",
                 "scctbill.BILLNM",
+                "scctbill.BILLAM",
                 "scctbill.BTA",
                 "scctbill.PAIDST",
                 "scctbill.BILLCD",
                 "scctcust.nocust",
+                "scctcust.NUM2ND",
                 "scctcust.nmcust",
                 "scctcust.CODE02",
                 "scctcust.DESC02",
                 "scctcust.DESC03",
             ])
+            ->orderBy("scctcust.nmcust", "asc")
             ->orderBy("scctcust.nocust", "asc")
             ->orderBy("scctbill.BTA", "desc")
             ->orderBy("scctbill.BILLNM", "asc")
@@ -159,13 +180,20 @@ class CekLunasSiswaController extends Controller
         }
 
         $records = $rowsQuery->get()->map(function ($item) {
+            $nis = trim((string) ($item->nocust ?? ""));
+            $num2nd = trim((string) ($item->NUM2ND ?? ""));
+            $novaSource = ($nis !== "" && $nis !== "-") ? $nis : (($num2nd !== "" && $num2nd !== "-") ? $num2nd : "");
+
             return [
                 "AA" => $item->AA,
                 "CUSTID" => $item->CUSTID,
                 "BTA" => $item->BTA,
-                "nocust" => $item->nocust,
+                "nocust" => ($nis !== "" && $nis !== "-") ? $nis : null,
+                "NUM2ND" => ($num2nd !== "" && $num2nd !== "-") ? $num2nd : null,
+                "NOVA" => $novaSource !== "" ? scctcust::showVA($novaSource) : null,
                 "nmcust" => $item->nmcust,
                 "BILLNM" => $item->BILLNM,
+                "BILLAM" => $item->BILLAM,
                 "BILLCD" => $item->BILLCD,
                 "status" => (int) $item->PAIDST === 1,
                 "CODE02" => $item->CODE02,

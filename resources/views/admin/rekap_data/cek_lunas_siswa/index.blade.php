@@ -224,6 +224,9 @@
             dataColumns: [],
             thead: true,
             tfoot: true,
+            scrollX: true,
+            // Kolom Nama Siswa (index 5 setelah checkbox/no)
+            order: [[5, 'asc']],
             paging: true,
             searching: true,
             fixedHeader: false,
