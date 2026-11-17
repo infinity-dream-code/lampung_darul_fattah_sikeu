@@ -7,15 +7,18 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
+use Throwable;
 
 class CheckSession
 {
     public function handle(Request $request, Closure $next): Response
     {
+        $this->ensureSessionUsable($request);
+
         if (!Auth::check()) {
             $user = PersistentLogin::userFromRequest($request);
             if ($user) {
-                PersistentLogin::bind($user);
+                PersistentLogin::bind($user, true);
                 PersistentLogin::queue($user);
             }
         }
@@ -32,6 +35,31 @@ class CheckSession
             return redirect()->guest(route('login'));
         }
 
+        PersistentLogin::queue(Auth::user());
+
         return $next($request);
+    }
+
+    private function ensureSessionUsable(Request $request): void
+    {
+        if (!$request->hasSession()) {
+            return;
+        }
+
+        try {
+            $request->session()->get('_darul_fattah_session_probe');
+        } catch (Throwable $e) {
+            try {
+                $request->session()->flush();
+            } catch (Throwable $flushError) {
+                //
+            }
+
+            try {
+                $request->session()->regenerate(true);
+            } catch (Throwable $regenerateError) {
+                //
+            }
+        }
     }
 }

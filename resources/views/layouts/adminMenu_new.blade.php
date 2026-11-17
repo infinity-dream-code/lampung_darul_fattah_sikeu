@@ -3,7 +3,7 @@
         <a href="{{route('admin.index')}}" class="app-brand-link">
             <span class="app-brand-logo demo">
                 <span style="color: var(--bs-primary)">
-                    <img width="50" height="50" src="{{asset('alirsyad.jpg')}}" alt="logo">
+                    <img width="50" height="50" src="{{asset('darul-fattah.jpg')}}" alt="logo">
                 </span>
             </span>
             <span class="app-brand-text demo menu-text fw-bold ms-2">SIKEU</span>
@@ -250,7 +250,7 @@
             </ul>
         </li>
 
-        {{-- Hidden for Al Irsyad Surabaya: Pengumuman, Infaq, Update Musrifah --}}
+        {{-- Hidden for Yayasan Darul Fattah Lampung: Pengumuman, Infaq, Update Musrifah --}}
 
         <li class="menu-item mt-auto pb-2">
             <a href="{{route('logout')}}" class="menu-link btn-danger text-white" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">

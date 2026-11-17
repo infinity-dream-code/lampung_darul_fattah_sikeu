@@ -14,7 +14,7 @@ class RecoverCorruptSession
     {
         if ($request->hasSession()) {
             try {
-                $request->session()->get('_surabaya_alirsyad_session_probe');
+                $request->session()->get('_darul_fattah_session_probe');
             } catch (Throwable $e) {
                 $this->resetSession($request);
             }

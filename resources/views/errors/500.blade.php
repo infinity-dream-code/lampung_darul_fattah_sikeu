@@ -7,7 +7,7 @@
 @section('script')
     <script>
         (function () {
-            const key = 'surabaya_alirsyad_500_reloaded';
+            const key = 'darul_fattah_500_reloaded';
             if (!sessionStorage.getItem(key)) {
                 sessionStorage.setItem(key, '1');
                 window.location.reload();

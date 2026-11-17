@@ -11,15 +11,29 @@ use Throwable;
 
 class PersistentLogin
 {
-    public const COOKIE = 'surabaya_alirsyad';
+    public const COOKIE = 'darul_fattah';
 
-    public const LEGACY_COOKIE = 'at-tibyan';
+    /** @var list<string> */
+    public const LEGACY_COOKIES = [
+        'surabaya_alirsyad',
+        'muallimat_presensi',
+        'at-tibyan',
+    ];
+
+    /** @deprecated Use LEGACY_COOKIES */
+    public const LEGACY_COOKIE = 'surabaya_alirsyad';
 
     public static function lifetimeMinutes(): int
     {
         $minutes = (int) config('session.lifetime', 5256000);
 
         return $minutes > 0 ? $minutes : 5256000;
+    }
+
+    /** @return list<string> */
+    public static function cookieNames(): array
+    {
+        return array_values(array_unique(array_merge([self::COOKIE], self::LEGACY_COOKIES)));
     }
 
     public static function bind(?CyberKey $user, bool $recreateSession = false): void
@@ -74,7 +88,7 @@ class PersistentLogin
 
     public static function forget(): void
     {
-        foreach ([self::COOKIE, self::LEGACY_COOKIE] as $name) {
+        foreach (self::cookieNames() as $name) {
             Cookie::queue(cookie(
                 $name,
                 '',
@@ -120,7 +134,7 @@ class PersistentLogin
 
     private static function rawCookieValue(Request $request): ?string
     {
-        foreach ([self::COOKIE, self::LEGACY_COOKIE] as $name) {
+        foreach (self::cookieNames() as $name) {
             foreach ([
                 $request->cookie($name),
                 $request->cookies->get($name),

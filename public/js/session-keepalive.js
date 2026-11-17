@@ -5,6 +5,8 @@
     }
 
     let keepAliveInFlight = null;
+    let softReloadScheduled = false;
+    let lastKeepAliveAuth = null;
     const nativeFetch = window.fetch.bind(window);
 
     function currentToken() {
@@ -43,10 +45,22 @@
             || text.includes('sesi anda')
             || text.includes('sesi sudah')
             || text.includes('sesi berakhir')
+            || text.includes('sesi habis')
             || text.includes('session expired')
+            || text.includes('token anda')
+            || text.includes('token mismatch')
+            || text.includes('page expired')
             || text.includes('login kembali')
             || text.includes('silahkan login')
             || text.includes('silakan login');
+    }
+
+    function softReload() {
+        if (softReloadScheduled) {
+            return;
+        }
+        softReloadScheduled = true;
+        window.location.reload();
     }
 
     function wrapErrorAlert() {
@@ -57,12 +71,41 @@
         const original = window.errorAlert;
         window.errorAlert = function (message) {
             if (isSessionNoise(message)) {
-                keepAlive();
+                keepAlive().then(function () {
+                    softReload();
+                });
                 return;
             }
             return original.apply(this, arguments);
         };
         window.errorAlert.__sessionKeepAliveWrapped = true;
+    }
+
+    function wrapSwal() {
+        if (!window.Swal || typeof window.Swal.fire !== 'function' || window.Swal.fire.__sessionKeepAliveWrapped) {
+            return;
+        }
+
+        const original = window.Swal.fire.bind(window.Swal);
+        window.Swal.fire = function () {
+            const args = arguments;
+            let text = '';
+            if (typeof args[0] === 'string') {
+                text = [args[0], args[1], args[2]].join(' ');
+            } else if (args[0] && typeof args[0] === 'object') {
+                text = [args[0].title, args[0].text, args[0].html].join(' ');
+            }
+
+            if (isSessionNoise(text)) {
+                keepAlive().then(function () {
+                    softReload();
+                });
+                return Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true });
+            }
+
+            return original.apply(window.Swal, args);
+        };
+        window.Swal.fire.__sessionKeepAliveWrapped = true;
     }
 
     function keepAlive() {
@@ -87,9 +130,12 @@
             }
             return res.json();
         }).then(function (data) {
-            if (data && data.token) {
-                applyToken(data.token);
-                return data.token;
+            if (data) {
+                lastKeepAliveAuth = !!data.authenticated;
+                if (data.token) {
+                    applyToken(data.token);
+                    return data.token;
+                }
             }
             return null;
         }).catch(function () {
@@ -164,7 +210,12 @@
 
             return keepAlive().then(function (token) {
                 const secondInput = canClone ? input.clone() : input;
-                return nativeFetch(secondInput, retryInit(input, init, token || currentToken()));
+                return nativeFetch(secondInput, retryInit(input, init, token || currentToken())).then(function (retryRes) {
+                    if (retryRes.status === 419 || (retryRes.status === 401 && lastKeepAliveAuth)) {
+                        softReload();
+                    }
+                    return retryRes;
+                });
             });
         });
     };
@@ -195,7 +246,6 @@
             const userError = settings.error;
             const userSuccess = settings.success;
             const userComplete = settings.complete;
-            const userStatusCode = settings.statusCode;
             delete settings.error;
             delete settings.success;
             delete settings.complete;
@@ -212,6 +262,12 @@
             }
 
             function fail(ctx, args) {
+                const jqXHR = args && args[0];
+                if (jqXHR && (jqXHR.status === 419 || (jqXHR.status === 401 && lastKeepAliveAuth))) {
+                    softReload();
+                    return;
+                }
+
                 if (typeof userError === 'function') {
                     userError.apply(ctx, args);
                 }
@@ -255,11 +311,13 @@
     }
 
     wrapErrorAlert();
+    wrapSwal();
     if (window.jQuery) {
         patchJQueryAjax(window.jQuery);
     } else {
         document.addEventListener('DOMContentLoaded', function () {
             wrapErrorAlert();
+            wrapSwal();
             if (window.jQuery) {
                 patchJQueryAjax(window.jQuery);
             }

@@ -680,7 +680,7 @@
             const userName = "{{ Auth::user()->name }}";
             const domisili = "{{ config('app.domisili') }}";
             const tanggalSekarang = "{{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM YYYY') }}";
-            const APP_NOVA = {{ (int) config('app.nova', 751079) }};
+            const APP_NOVA = {{ (int) config('app.nova', 751019) }};
             const showVA = (nis) => {
                 if (!nis) return '';
                 return String(APP_NOVA) + String(nis).padStart(10, '0');

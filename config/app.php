@@ -16,13 +16,13 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Al Irsyad Surabaya'),
-    'nama_instansi' => env('APP_NAMA_INSTANSI', 'Al Irsyad Surabaya'),
-    'alamat' => env('APP_ALAMAT', 'Kota Surabaya, Prov. Jawa Timur'),
+    'name' => env('APP_NAME', 'Yayasan Darul Fattah Lampung'),
+    'nama_instansi' => env('APP_NAMA_INSTANSI', 'Yayasan Darul Fattah Lampung'),
+    'alamat' => env('APP_ALAMAT', 'Kota Bandar Lampung, Prov. Lampung'),
     'email' => env('APP_EMAIL', ''),
     'telepon' => env('APP_TELEPON', ''),
-    'domisili' => env('APP_DOMISILI', 'SURABAYA'),
-    'nova' => env('APP_NOVA', 751079),
+    'domisili' => env('APP_DOMISILI', 'BANDAR LAMPUNG'),
+    'nova' => env('APP_NOVA', 751019),
     'biaya_admin' => env('BIAYA_ADMIN', 0),
     'dummy_seeder' => env('DUMMY_SEEDER',false),
     'demo_mode' => env('DEMO_MODE',false),

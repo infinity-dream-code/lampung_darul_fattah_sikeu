@@ -7,14 +7,17 @@
 @section('script')
     <script>
         (function () {
-            const key = 'surabaya_alirsyad_419_reloaded';
+            const key = 'darul_fattah_419_reloaded';
             if (!sessionStorage.getItem(key)) {
                 sessionStorage.setItem(key, '1');
                 window.location.reload();
                 return;
             }
             sessionStorage.removeItem(key);
-            window.location.href = {{ Illuminate\Support\Js::from(url('/admin')) }};
+            const back = document.referrer;
+            window.location.href = back && back.indexOf(window.location.origin) === 0
+                ? back
+                : {{ Illuminate\Support\Js::from(url('/admin')) }};
         })();
     </script>
 @endsection

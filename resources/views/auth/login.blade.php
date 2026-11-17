@@ -22,16 +22,17 @@
                         <a href="{{route('index')}}" class="app-brand-link gap-2">
                             <span class="app-brand-logo demo">
                                 <span style="color: #666cff">
-                                        <img width="100" height="100" src="{{asset('alirsyad.jpg')}}" alt="logo">
+                                        <img width="100" height="100" src="{{asset('darul-fattah.jpg')}}" alt="logo">
                                 </span>
                             </span>
                         </a>
                     </div>
 
                     <div class="card-body mt-2">
-                        {{-- <div class="row text-center">
-                            <h3>{{config('app.name')}}</h3>
-                        </div> --}}
+                        <div class="row text-center mb-3">
+                            <h4 class="mb-1">{{ config('app.name') }}</h4>
+                            <p class="text-muted mb-0 small">{{ config('app.alamat') }}</p>
+                        </div>
                         <div class="row">
                             <div class="col-8">
                                 <h4 class="mb-2">Selamat Datang!</h4>

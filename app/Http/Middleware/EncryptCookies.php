@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\PersistentLogin;
 use Illuminate\Cookie\Middleware\EncryptCookies as Middleware;
 
 class EncryptCookies extends Middleware
@@ -12,7 +13,9 @@ class EncryptCookies extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        \App\Support\PersistentLogin::COOKIE,
-        \App\Support\PersistentLogin::LEGACY_COOKIE,
+        PersistentLogin::COOKIE,
+        'surabaya_alirsyad',
+        'muallimat_presensi',
+        'at-tibyan',
     ];
 }

@@ -105,7 +105,7 @@ class Handler extends ExceptionHandler
         }
 
         try {
-            $request->session()->get('_surabaya_alirsyad_session_probe');
+            $request->session()->get('_darul_fattah_session_probe');
         } catch (Throwable $e) {
             try {
                 $request->session()->flush();
@@ -131,11 +131,7 @@ class Handler extends ExceptionHandler
             ], $status);
         }
 
-        if ($request->isMethod('GET')) {
-            return redirect()->to($request->fullUrl());
-        }
-
-        return redirect()->back();
+        return redirect()->to($this->safeReturnUrl($request));
     }
 
     private function respondAfterSessionRecovery(Request $request): Response
@@ -151,11 +147,26 @@ class Handler extends ExceptionHandler
             ]);
         }
 
+        return redirect()->to($this->safeReturnUrl($request));
+    }
+
+    private function safeReturnUrl(Request $request): string
+    {
         if ($request->isMethod('GET')) {
-            return redirect()->to($request->fullUrl());
+            return $request->fullUrl();
         }
 
-        return redirect()->back();
+        $previous = url()->previous();
+        if (is_string($previous) && $previous !== '' && $previous !== url()->current()) {
+            return $previous;
+        }
+
+        $fallback = $request->headers->get('Referer');
+        if (is_string($fallback) && $fallback !== '') {
+            return $fallback;
+        }
+
+        return url('/admin');
     }
 
     private function isAjaxRequest(Request $request): bool
