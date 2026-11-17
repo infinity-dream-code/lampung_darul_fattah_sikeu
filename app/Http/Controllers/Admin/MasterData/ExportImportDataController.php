@@ -451,16 +451,19 @@ class ExportImportDataController extends Controller
             'DESC04' => $thn_aka->thn_aka,
             'DESC05' => $item['alamat'] ?? null,
             'GENUS' => $this->resolveOrtuForDb($item),
-            'NO_WA' => $this->resolveNoWaForDb($item),
             'LastUpdate' => Carbon::now(),
         ];
+
+        if (\App\Support\DbSchema::scctcustHasNoWa()) {
+            $payload['NO_WA'] = $this->resolveNoWaForDb($item);
+        }
 
         if ($existingCust) {
             $payload['NOCUST'] = $metodeByNodaftar ? ($item['nis'] ?? $existingCust->NOCUST) : $existingCust->NOCUST;
             $payload['NUM2ND'] = $metodeByNodaftar
                 ? $existingCust->NUM2ND
                 : ($item['nodaftar'] ?? $existingCust->NUM2ND ?? '-');
-            if (blank($payload['NO_WA'])) {
+            if (\App\Support\DbSchema::scctcustHasNoWa() && blank($payload['NO_WA'] ?? null)) {
                 $payload['NO_WA'] = $existingCust->NO_WA;
             }
 

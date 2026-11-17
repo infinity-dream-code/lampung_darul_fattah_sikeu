@@ -18,7 +18,9 @@ class CheckSession
         if (!Auth::check()) {
             $user = PersistentLogin::userFromRequest($request);
             if ($user) {
-                PersistentLogin::bind($user, true);
+                // Soft bind only: Auth::login()/migrate() on every request
+                // can lock the session file and break DataTables get-data (500).
+                PersistentLogin::bind($user);
                 PersistentLogin::queue($user);
             }
         }

@@ -12,6 +12,7 @@ use App\Models\scctcust;
 use App\Models\User;
 use App\Models\ValidationMessage;
 use App\Support\CacheHandler;
+use App\Support\DbSchema;
 use App\Support\FilterHandler;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -691,6 +692,7 @@ class DataTagihanController extends Controller
             'scctcust.DESC03',
         ];
 
+        $hasNoWa = DbSchema::scctcustHasNoWa();
         $select = array_unique(array_merge($whereAny, [
             'scctbill.AA',
             'scctbill.BILLNM',
@@ -702,10 +704,11 @@ class DataTagihanController extends Controller
             'scctbill.FIDBANK',
             'scctcust.CODE02',
             'scctcust.NUM2ND',
-            'scctcust.NO_WA',
             'scctbill.CUSTID',
-
         ]));
+        if ($hasNoWa) {
+            $select[] = 'scctcust.NO_WA';
+        }
 
         $query = scctbill::leftJoin('scctcust', 'scctcust.CUSTID', 'scctbill.CUSTID')
             ->select($select)
